@@ -1,4 +1,5 @@
-class File {
-    foreign static open(name, mode)
-    foreign static readall(fd)
+foreign class File {
+    construct open(path) {}
+    foreign readall()
+    foreign close()
 }

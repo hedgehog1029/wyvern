@@ -86,6 +86,7 @@ WrenVM* wyvern_new_vm() {
 
     config.loadModuleFn = wyvern_wren_load_module;
     config.bindForeignMethodFn = wyvern_wren_bind_foreign_method;
+    config.bindForeignClassFn = wyvern_wren_bind_foreign_class;
     config.writeFn = wyvern_debug;
     config.errorFn = wyvern_report_err;
 
