@@ -4,14 +4,7 @@
 #include <errno.h>
 
 int wyvern_open_file(const char* path, int flags) {
-    int fd = open(path, flags);
-
-    if (fd == -1) {
-        wyvern_log(ERROR, "Error opening file! %i", errno);
-        return -1;
-    }
-
-    return fd;
+    return open(path, flags);
 }
 
 char* wyvern_read(int fd, int size) {
@@ -48,4 +41,16 @@ int wyvern_close_file(int fd) {
     }
 
     return close(fd);
+}
+
+char* wyvern_read_file(const char* path) {
+    int fd = wyvern_open_file(path, O_RDONLY);
+    if (fd == -1) {
+        return NULL;
+    }
+
+    char* contents = wyvern_read_all(fd);
+    wyvern_close_file(fd);
+
+    return contents;
 }

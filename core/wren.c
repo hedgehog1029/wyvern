@@ -16,11 +16,30 @@ void wyvern_import_file(WrenVM* vm, const char* path) {
     wyvern_close_file(fd);
 }
 
-char* wyvern_wren_load_module(WrenVM* vm, const char* name) {
-    int fd = wyvern_open_file(name, 0);
-    char* contents = wyvern_read_all(fd);
+static char* load_paths[] = {
+    "/usr/lib/wyvern/modules/",
+    "./modules/"
+};
 
-    return contents;
+char* wyvern_wren_load_module(WrenVM* vm, const char* name) {
+    // Tries to load a module from various locations
+    if (strncmp(name, "./", 2) == 0) {
+        return wyvern_read_file(name);
+    }
+
+    for (size_t i = 0; i < 2; i++) {
+        char* base = load_paths[i];
+        char* path = wyvern_concat(base, name, ".wren", NULL);
+
+        char* contents = wyvern_read_file(path);
+        free(path);
+
+        if (contents != NULL) {
+            return contents;
+        }
+    }
+
+    return NULL;
 }
 
 WrenForeignMethodFn wyvern_wren_bind_foreign_method(WrenVM* vm, const char* module, const char* class_name, bool is_static, const char* signature) {
@@ -37,7 +56,6 @@ WrenForeignMethodFn wyvern_wren_bind_foreign_method(WrenVM* vm, const char* modu
     sprintf(symbol_name, "wyvern_foreign_%s_%s%s", class_name, method_name, static_str);
     void* func = dlsym(handle, &symbol_name[0]);
 
-    // wyvern_log(DEBUG, "resolved name: %s", &symbol_name[0]);
     if (func == NULL) {
         wyvern_log(DEBUG, "error loading function: %s", dlerror());
     }
@@ -62,7 +80,7 @@ WrenForeignClassMethods wyvern_wren_bind_foreign_class(WrenVM* vm, const char* m
     return methods;
 }
 
-void wyvern_debug(WrenVM* vm, const char* text) {
+void wyvern_write_out(WrenVM* vm, const char* text) {
     printf("%s", text);
 }
 
@@ -89,7 +107,7 @@ WrenVM* wyvern_new_vm() {
     config.loadModuleFn = wyvern_wren_load_module;
     config.bindForeignMethodFn = wyvern_wren_bind_foreign_method;
     config.bindForeignClassFn = wyvern_wren_bind_foreign_class;
-    config.writeFn = wyvern_debug;
+    config.writeFn = wyvern_write_out;
     config.errorFn = wyvern_report_err;
 
     WrenVM* vm = wrenNewVM(&config);

@@ -1,23 +1,11 @@
 #include <errno.h>
 #include <sys/file.h>
 
-void wyvern_foreign_File_class_new(WrenVM* vm) {
-    int* fd = wrenSetSlotNewForeign(vm, 0, 0, sizeof(int));
-    const char* path = wrenGetSlotString(vm, 1);
-
-    *fd = wyvern_open_file(path, O_RDWR);
-}
-
-void wyvern_foreign_File_class_finalize(void* data) {
-    int* fd = (int*) data;
-    wyvern_close_file(*fd);
-    *fd = 0;
-
-    return;
-}
-
-void wyvern_file_handle_error(WrenVM* vm) {
+static void wyvern_file_handle_error(WrenVM* vm) {
     switch (errno) {
+        case EACCES:
+            wrenSetSlotString(vm, 0, "Access to that file is not allowed (or it does not exist.)");
+            break;
         case EBADF:
             wrenSetSlotString(vm, 0, "File is closed!");
             break;
@@ -33,6 +21,25 @@ void wyvern_file_handle_error(WrenVM* vm) {
     }
 
     wrenAbortFiber(vm, 0);
+}
+
+void wyvern_foreign_File_class_new(WrenVM* vm) {
+    int* fd = wrenSetSlotNewForeign(vm, 0, 0, sizeof(int));
+    const char* path = wrenGetSlotString(vm, 1);
+
+    *fd = wyvern_open_file(path, O_RDWR);
+
+    if (*fd == -1) {
+        wyvern_file_handle_error(vm);
+    }
+}
+
+void wyvern_foreign_File_class_finalize(void* data) {
+    int* fd = (int*) data;
+    wyvern_close_file(*fd);
+    *fd = 0;
+
+    return;
 }
 
 void wyvern_foreign_File_readall(WrenVM* vm) {

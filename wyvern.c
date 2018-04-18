@@ -2,6 +2,7 @@
 #include <wren.h>
 #include <string.h>
 
+#include "core/util.c"
 #include "core/log.c"
 #include "core/io.c"
 #include "core/wren.c"
@@ -23,8 +24,7 @@ int main(int argc, char const *argv[]) {
 
     wyvern_info("Running wren file %s", main_path);
     WrenVM* vm = wyvern_new_vm();
-
-    wyvern_import_file(vm, "lib/file.wren"); // TODO: do this loading properly
+    
     wyvern_import_file(vm, main_path);
 
     wrenFreeVM(vm);
