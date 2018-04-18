@@ -12,6 +12,8 @@ void wyvern_import_file(WrenVM* vm, const char* path) {
     } else if (result == WREN_RESULT_RUNTIME_ERROR) {
         wyvern_log(WARNING, "Error running file: %s", path);
     }
+
+    wyvern_close_file(fd);
 }
 
 char* wyvern_wren_load_module(WrenVM* vm, const char* name) {

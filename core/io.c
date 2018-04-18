@@ -34,14 +34,18 @@ char* wyvern_read_all(int fd) {
     return wyvern_read(fd, size);
 }
 
-void wyvern_close_file(int fd) {
+int wyvern_write(int fd, char* data) {
+    int size = strlen(data);
+    int count = write(fd, data, size);
+
+    return count;
+}
+
+int wyvern_close_file(int fd) {
     if (fd == -1) {
-        return;
+        errno = EBADF;
+        return -1;
     }
 
-    int status = close(fd);
-
-    if (status == -1) {
-        wyvern_log(DEBUG, "Error closing file descriptor %i: %i", fd, errno);
-    }
+    return close(fd);
 }
