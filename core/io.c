@@ -20,10 +20,15 @@ char* wyvern_read(int fd, int size) {
     return contents;
 }
 
-char* wyvern_read_all(int fd) {
+int wyvern_query_size(int fd) {
     int size = lseek(fd, 0, SEEK_END);
     lseek(fd, 0, SEEK_SET);
 
+    return size;
+}
+
+char* wyvern_read_all(int fd) {
+    int size = wyvern_query_size(fd);
     return wyvern_read(fd, size);
 }
 

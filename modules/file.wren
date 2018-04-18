@@ -3,5 +3,6 @@ foreign class File {
     foreign readall()
     foreign read(n)
     foreign write(content)
+    foreign size()
     foreign close()
 }

@@ -82,6 +82,13 @@ void wyvern_foreign_File_write(WrenVM* vm) {
     wrenSetSlotDouble(vm, 0, count);
 }
 
+void wyvern_foreign_File_size(WrenVM* vm) {
+    int* fd = (int*) wrenGetSlotForeign(vm, 0);
+    int size = wyvern_query_size(*fd);
+
+    wrenSetSlotDouble(vm, 0, size);
+}
+
 void wyvern_foreign_File_close(WrenVM* vm) {
     int* fd = (int*) wrenGetSlotForeign(vm, 0);
 
