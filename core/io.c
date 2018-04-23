@@ -8,7 +8,7 @@ int wyvern_open_file(const char* path, int flags) {
 }
 
 char* wyvern_read(int fd, int size) {
-    char* contents = malloc(size);
+    char* contents = malloc(size + 1);
     int status = read(fd, contents, size);
     if (status == -1) {
         wyvern_log(ERROR, "Error reading file!");

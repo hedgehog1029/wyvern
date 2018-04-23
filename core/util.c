@@ -19,3 +19,17 @@ char* wyvern_concat(char* a, ...) {
 
     return final;
 }
+
+void wyvern_debug_string(char* s) {
+    int len = strlen(s);
+
+    printf("string length %i: [", len);
+    for (size_t i = 0; i < len; i++) {
+        int value = s[i];
+        printf("%x", value);
+
+        if (i != len - 1)
+            printf(", ");
+    }
+    puts("]");
+}

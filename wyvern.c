@@ -1,4 +1,7 @@
+#define _POSIX_C_SOURCE 20112L
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <wren.h>
 #include <string.h>
 
@@ -24,7 +27,7 @@ int main(int argc, char const *argv[]) {
 
     wyvern_info("Running wren file %s", main_path);
     WrenVM* vm = wyvern_new_vm();
-    
+
     wyvern_import_file(vm, main_path);
 
     wrenFreeVM(vm);

@@ -1,25 +1,27 @@
-#include <errno.h>
 #include <sys/file.h>
 
 static void wyvern_file_handle_error(WrenVM* vm) {
+    char* error_str;
+
     switch (errno) {
         case EACCES:
-            wrenSetSlotString(vm, 0, "Access to that file is not allowed (or it does not exist.)");
+            error_str = "Access to that file is not allowed (or it does not exist.)";
             break;
         case EBADF:
-            wrenSetSlotString(vm, 0, "File is closed!");
+            error_str = "File is closed!";
             break;
         case EINTR:
-            wrenSetSlotString(vm, 0, "System call was interrupted by a signal.");
+            error_str = "System call was interrupted by a signal.";
             break;
         case EIO:
-            wrenSetSlotString(vm, 0, "I/O error.");
+            error_str = "I/O error.";
             break;
         default:
-            wrenSetSlotString(vm, 0, "Unknown file error.");
+            error_str = "Unknown file error.";
             break;
     }
 
+    wrenSetSlotString(vm, 0, error_str);
     wrenAbortFiber(vm, 0);
 }
 
@@ -37,7 +39,7 @@ void wyvern_foreign_File_class_new(WrenVM* vm) {
 void wyvern_foreign_File_class_finalize(void* data) {
     int* fd = (int*) data;
     wyvern_close_file(*fd);
-    *fd = 0;
+    *fd = -1;
 
     return;
 }

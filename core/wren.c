@@ -35,6 +35,7 @@ char* wyvern_wren_load_module(WrenVM* vm, const char* name) {
         free(path);
 
         if (contents != NULL) {
+            // wyvern_debug_string(contents);
             return contents;
         }
     }
