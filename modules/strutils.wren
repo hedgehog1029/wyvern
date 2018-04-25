@@ -37,8 +37,35 @@ class Lexer {
         return buffer.join("")
     }
 
+    consumeUntilNewline() {
+        var buffer = []
+
+        while (hasNext) {
+            var ch = this.peek
+
+            if (ch == "\n") {
+                this.skip()
+                break
+            } else if (ch == "\r") {
+                if (this.peekAhead(1) == "\n") {
+                    this.skip(2)
+                    break
+                }
+            } else {
+                buffer.add(ch)
+                this.skip()
+            }
+        }
+
+        return buffer.join("")
+    }
+
     skip() {
         _cursor = _cursor + 1
+    }
+
+    skip(n) {
+        _cursor = _cursor + n
     }
 
     skipMatching(test) {
@@ -48,7 +75,7 @@ class Lexer {
         while (hasNext) {
             var ch = this.peek
 
-            if (i >= parts.count) return false
+            if (i >= parts.count) break
 
             if (ch != parts[i]) {
                 return false
@@ -59,6 +86,20 @@ class Lexer {
         }
 
         return true
+    }
+
+    skipWhitespace() {
+        while (hasNext) {
+            var ch = this.next()
+
+            if (ch == "\n" || ch == "\t" || ch == " ") {
+            } else if (ch == "\r" && this.peekAhead(2) == "\n") {
+                this.skip()
+            } else {
+                this.skip(-1)
+                break
+            }
+        }
     }
 
     next() {

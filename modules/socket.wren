@@ -27,6 +27,8 @@ class URL {
     queryStr { _query }
 
     fullPath { _path + _query }
+
+    toString { _protocol + "://" + _host + fullPath }
 }
 
 class HttpRequestBuilder {
@@ -58,10 +60,41 @@ class HttpRequestBuilder {
     }
 }
 
+class HttpResponse {
+    construct parse(res) {
+        var lex = Lexer.new(res)
+
+        _statusline = lex.consumeUntilNewline()
+        var statusParts = _statusline.split(" ")
+        _status = Num.fromString(statusParts[1])
+
+        _headers = {}
+
+        while (true) {
+            var header = lex.consumeUntilNewline()
+            
+            if (header.bytes.count == 0) {
+                break
+            }
+
+            var parts = header.split(": ")
+            _headers[parts[0]] = parts[1]
+        }
+
+        _body = lex.consumeAll()
+    }
+
+    statusCode { _status }
+    headers { _headers }
+    body { _body }
+
+    toString { "HttpResponse(status=%(statusCode), headers=%(headers))" }
+}
+
 class HttpClient {
     construct new() {}
 
-    request(method, url, headers) {
+    request(method, url, body, headers) {
         var uri = URL.parse(url)
         var sock = Socket.new("tcp", uri.host, "80")
         var req = HttpRequestBuilder.new().
@@ -69,8 +102,20 @@ class HttpClient {
             addHeader("User-Agent", "WyvernHttp/0.1.0 Wyvern/0.0.1 stdlib").
             addHeader("Host", uri.host)
 
+        for (k in headers.keys) {
+            req.addHeader(k, headers[k])
+        }
+
+        var bodyLength = body.bytes.count
+        if (bodyLength > 0) {
+            req.addHeader("Content-Length", bodyLength.toString)
+        }
+
         sock.connect()
         sock.write(req.build())
+        if (bodyLength > 0) {
+            sock.write(body)
+        }
 
         var res = ""
         while (true) {
@@ -81,10 +126,10 @@ class HttpClient {
         }
 
         sock.close()
-        return res
+        return HttpResponse.parse(res)
     }
 
     request(method, url) {
-        return request(method, url, [])
+        return request(method, url, "", {})
     }
 }
